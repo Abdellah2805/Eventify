@@ -1,24 +1,193 @@
 /* src/styles/App.css */
 
-/* --- Réinitialisation et Base --- */
+/* ========================================= */
+/* 1. RESET ET TYPOGRAPHIE GLOBALE           */
+/* ========================================= */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4; /* Léger fond gris */
+    background-color: #f4f7f9; /* Légèrement ajusté pour être plus propre */
     color: #333;
+    overflow-x: hidden; /* Empêche le défilement horizontal */
 }
 
-/* --- Styles des Liens et Navigation (pour compléter NavMenu) --- */
-.nav-links a {
+a {
     text-decoration: none;
+    color: inherit;
+}
+
+.main-content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ========================================= */
+/* 2. HEADER ET NAVIGATION (MENU BURGER)     */
+/* ========================================= */
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px; 
+    background-color: white; 
+    border-bottom: 3px solid #ff6700; /* Ligne orange */
+}
+
+/* Style du logo */
+.eventify-logo {
+    color: #ff6700;
+    font-size: 1.8em;
+    font-weight: 900; 
+    text-decoration: none;
+    z-index: 1001; /* S'assure qu'il est au-dessus du menu mobile */
+}
+
+/* --------------------------------- */
+/* 🔑 2.1 Styles du Bouton Hamburger */
+/* --------------------------------- */
+.menu-toggle {
+    display: none; /* Masqué par défaut sur desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px; /* Pour une meilleure zone de clic */
+    z-index: 1000;
+}
+
+.burger-line {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px 0;
+    background-color: #ff6700; /* Lignes oranges */
+    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+}
+
+/* 🔑 Animation de la croix lorsque la classe 'open' est ajoutée */
+.menu-toggle.open .burger-line:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+.menu-toggle.open .burger-line:nth-child(2) {
+    opacity: 0; /* Masque la ligne du milieu */
+}
+.menu-toggle.open .burger-line:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* --------------------------------- */
+/* 🔑 2.2 Styles des Liens de Navigation */
+/* --------------------------------- */
+
+.nav-links {
+    display: flex; /* Utilisation de flexbox pour l'alignement sur desktop */
+    align-items: center;
+    gap: 20px; 
+}
+
+/* Style de lien générique pour desktop */
+.nav-links a.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
     transition: color 0.3s;
 }
-.nav-links a:hover {
+
+.nav-links a.nav-link:hover {
     color: #ff6700;
 }
 
-/* --- Styles des Formulaires Génériques (Login, Register, EventForm) --- */
+/* Marge entre les liens/boutons sur desktop */
+.nav-links .btn-primary,
+.nav-links .btn-danger {
+    margin-left: 20px; 
+}
+
+
+/* ========================================= */
+/* 3. RESPONSIVITÉ (Mobile/Tablette)         */
+/* ========================================= */
+
+@media (max-width: 768px) {
+
+    /* 🔑 3.1 Menu Hamburger : le bouton apparaît */
+    .menu-toggle {
+        display: block; 
+    }
+    
+    /* 🔑 3.2 Le conteneur des liens devient un menu vertical coulissant */
+    .nav-links {
+        /* Propriétés pour le menu coulissant */
+        flex-direction: column;
+        align-items: flex-start;
+        position: fixed; /* Utiliser 'fixed' pour qu'il ne bouge pas en scrollant */
+        top: 60px; /* Commence sous la barre de navigation (ajustez si besoin) */
+        right: 0; 
+        width: 70%; 
+        height: 100%; /* S'étend sur toute la hauteur */
+        background-color: white; 
+        box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1); 
+        overflow-y: auto; /* Permet de scroller si les liens sont nombreux */
+        
+        /* Masquage initial (hors écran à droite) */
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 999;
+        padding: 15px 20px;
+    }
+
+    /* 🔑 3.3 Affichage du menu quand la classe 'active' est présente */
+    .nav-links.active {
+        transform: translateX(0);
+    }
+    
+    /* 3.4 Style des liens à l'intérieur du menu ouvert */
+    .nav-links a.nav-link,
+    .nav-links .btn-primary,
+    .nav-links .btn-danger { 
+        width: 100%;
+        text-align: left;
+        
+        /* Nettoyage des marges desktop */
+        margin: 0 !important; 
+        
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        
+        /* S'assure que l'élément prend toute la largeur */
+        display: block;
+        box-sizing: border-box;
+    }
+    
+    /* Ajustement des boutons dans le menu */
+    .nav-links .btn-primary,
+    .nav-links .btn-danger {
+        text-align: center;
+        margin-top: 10px !important;
+        padding: 10px 18px; 
+    }
+    
+    /* 3.5 Responsivité de la Barre de Recherche */
+    .search-form .form-row {
+        flex-direction: column; 
+        gap: 15px;
+    }
+
+    /* 3.6 Ajustement général du conteneur des formulaires sur mobile */
+    .form-container, .registration-form {
+        margin: 20px 10px;
+        padding: 20px;
+    }
+}
+
+
+/* ========================================= */
+/* 4. STYLES DES BOUTONS ET FORMULAIRES      */
+/* ========================================= */
+/* --- Styles des Formulaires Génériques --- */
 .form-container, .registration-form {
     max-width: 450px;
     margin: 30px auto;
@@ -46,7 +215,7 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* S'assure que le padding n'augmente pas la largeur */
+    box-sizing: border-box;
     font-size: 16px;
 }
 
@@ -58,98 +227,64 @@ button, .btn-primary, .btn-secondary, .btn-danger {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s;
+    width: auto; 
+    display: inline-block; 
+    box-sizing: border-box; 
 }
 
-/* Boutons primaires (pour les actions principales ou l'inscription organisateur) */
 .btn-primary, button[type="submit"] {
-    background-color: #ff6700; /* Orange Eventify */
+    background-color: #ff6700;
     color: white;
 }
 .btn-primary:hover, button[type="submit"]:hover:not(:disabled) {
     background-color: #e65c00;
 }
 
-/* Boutons secondaires (Modifier) */
 .btn-secondary {
-    background-color: #007bff; /* Bleu */
+    background-color: #007bff;
     color: white;
 }
 .btn-secondary:hover {
     background-color: #0056b3;
 }
 
-/* Boutons de danger (Supprimer) */
 .btn-danger {
-    background-color: #dc3545; /* Rouge */
+    background-color: #dc3545;
     color: white;
 }
 .btn-danger:hover {
     background-color: #c82333;
 }
 
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
 
-/* --- Messages d'Erreur et de Notification --- */
-.error-message {
-    color: #dc3545;
-    font-size: 0.9em;
-    margin-top: 5px;
-}
+/* ========================================= */
+/* 5. STYLES DES CARTES D'ÉVÉNEMENTS         */
+/* ========================================= */
 
-.alert {
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-/* --- Styles spécifiques à la HomePage (Recherche) --- */
-.search-form {
-    padding: 25px !important;
-    background-color: #ffffff !important;
-    border: 1px solid #eee !important;
-}
-
+/* Styles de cartes d'événements publics (non modifiés) */
 .event-card-public {
     border: 1px solid #ddd;
     padding: 20px;
-    border-radius: 10px; /* Coins arrondis plus prononcés */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Ombre plus douce */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     background-color: white;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Effet au survol pour les rendre plus interactives */
 .event-card-public:hover {
-    transform: translateY(-5px); /* Légère élévation */
+    transform: translateY(-5px); 
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
 
-/* Titre de l'événement */
 .event-card-public .event-title {
-    color: #ff6700; /* Couleur principale */
+    color: #ff6700;
     font-size: 1.4em;
     margin-top: 0;
     margin-bottom: 10px;
-    border-bottom: 2px solid #ff670030; /* Ligne sous le titre */
+    border-bottom: 2px solid #ff670030;
     padding-bottom: 5px;
 }
 
-/* Style des informations (Lieu et Date) */
 .event-card-public p {
     font-size: 1em;
     color: #555;
@@ -158,21 +293,10 @@ button:disabled {
     align-items: center;
 }
 
-/* Les icônes pour le lieu et la date (représentées ici par des emojis pour la simplicité) */
-/* Dans le code React, nous utiliserons les emojis '📍' et '📅' comme icônes */
-.event-card-public p span.icon {
-    margin-right: 8px;
-    font-size: 1.2em;
-}
-
-/* Lien de détail */
 .event-card-public .details-link {
     display: block;
     margin-top: 15px;
     color: #007bff;
     font-weight: bold;
     text-align: right;
-}
-.event-card-public .details-link:hover {
-    text-decoration: underline;
 }
