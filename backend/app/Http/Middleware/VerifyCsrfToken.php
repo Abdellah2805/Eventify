@@ -11,7 +11,13 @@ class VerifyCsrfToken extends Middleware
      *
      * @var array<int, string>
      */
-    protected $except = [
-        //
+        protected $except = [
+        // AJOUTE TES ROUTES D'AUTHENTIFICATION ICI
+        'api/login',
+        'api/register',
+        'api/logout',
+        'api/organisateur/events',
+        // Si d'autres routes de ton API n'utilisent pas de session, tu peux les ajouter aussi
+        'api/events/*', 
     ];
 }
