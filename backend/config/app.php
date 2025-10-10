@@ -211,7 +211,11 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
+        // ... autres alias existants
+        
+        // 🔑 AJOUTEZ CETTE LIGNE
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+        
     ])->toArray(),
 
 ];

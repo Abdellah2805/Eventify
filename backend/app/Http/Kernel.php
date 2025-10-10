@@ -16,7 +16,8 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
+        // CORS doit s'exécuter très tôt
+        \Illuminate\Http\Middleware\HandleCors::class, 
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
@@ -39,6 +40,12 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            // 🔑 CORRECTION CRUCIALE : Ajout des middlewares de cookies et de session
+            // Ceci permet à Sanctum de bien gérer le stateful API pour votre SPA.
+            \App\Http\Middleware\EncryptCookies::class, 
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class, 
+            
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -46,7 +53,7 @@ class Kernel extends HttpKernel
     ];
 
     /**
-     * The application's middleware aliases.
+     * The application's route middleware aliases.
      *
      * Aliases may be used to conveniently assign middleware to routes and groups.
      *

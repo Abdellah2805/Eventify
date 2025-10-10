@@ -1,12 +1,14 @@
-// src/components/Auth/Login.js (FINAL CSS-FRIENDLY)
+// src/components/Auth/Login.js
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
+// 🔑 L'importation de loginUser est maintenue, la logique CSRF est dans API.js
 import { loginUser } from '../../services/API';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
+    // Utilisation de React-Hook-Form comme dans votre version originale
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState(null);
@@ -18,6 +20,7 @@ const Login = () => {
         setSubmitError(null);
 
         try {
+            // 🔑 La gestion du CSRF est encapsulée DANS loginUser(data)
             const response = await loginUser(data);
             
             login(response.data); 
@@ -25,8 +28,17 @@ const Login = () => {
 
         } catch (error) {
             console.error("Erreur de connexion:", error);
-            const errorMessage = error.response?.data?.message || "Échec de la connexion. Veuillez réessayer.";
+            
+            // Amélioration de la gestion des erreurs (pour les erreurs 419/CSRF)
+            let errorMessage = "Échec de la connexion. Veuillez réessayer.";
+            if (error.response?.status === 419) {
+                errorMessage = "Erreur de sécurité : Session expirée ou CSRF Token manquant. Veuillez réessayer.";
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            
             setSubmitError(errorMessage);
+            
         } finally {
             setIsSubmitting(false);
         }
@@ -53,7 +65,8 @@ const Login = () => {
                 </div>
 
                 {/* Affichage de l'erreur de soumission */}
-                {submitError && <div className="alert alert-danger">{submitError}</div>}
+                {/* 🔑 La classe CSS est utilisée pour l'affichage de l'erreur (voir image_26b127.png) */}
+                {submitError && <div className="alert alert-danger">{submitError}</div>} 
 
                 {/* Bouton de Soumission */}
                 <button type="submit" disabled={isSubmitting} className="btn-primary">

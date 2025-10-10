@@ -3,12 +3,13 @@
 // app/Http/Controllers/EventController.php
 
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event; // Assurez-vous d'importer votre modèle Event
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail; // 🔑 Importez le Facade Mail
+use App\Mail\EventTicketMail;        // 🔑 Importez votre Mailable (DOIT EXISTER)
 
 class EventController extends Controller
 {
@@ -47,25 +48,21 @@ class EventController extends Controller
             'location' => $request->location,
             'date' => $request->date,
             'capacity' => $request->capacity,
-            // user_id est automatiquement rempli si la relation est configurée correctement,
-            // mais l'associer via la relation est plus sûr.
+            'category_id' => $request->category_id,
         ]);
-        
-        return response()->json([
-            'message' => 'Événement créé avec succès',
-            'event' => $event
-        ], 201);
+
+        return response()->json(['message' => 'Événement créé avec succès', 'event' => $event], 201);
     }
 
     /**
-     * Affiche un événement spécifique (show).
+     * Affiche l'événement spécifié (show).
      */
     public function show(Event $event)
     {
-        // On s'assure que seul l'organisateur de l'événement peut le voir/modifier
         if ($event->user_id !== Auth::id()) {
             return response()->json(['message' => 'Non autorisé.'], 403);
         }
+        
         return response()->json($event);
     }
 
@@ -74,7 +71,6 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        // On vérifie que c'est bien l'organisateur qui met à jour
         if ($event->user_id !== Auth::id()) {
             return response()->json(['message' => 'Non autorisé.'], 403);
         }
@@ -83,7 +79,7 @@ class EventController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'required|string|max:255',
-            'date' => 'required|date',
+            'date' => 'required|date|after:now',
             'capacity' => 'required|integer|min:1',
             'category_id' => 'sometimes|nullable|integer',
         ]);
@@ -114,12 +110,11 @@ class EventController extends Controller
         // Logique de recherche/filtrage pour la page d'accueil
         $query = Event::query();
 
-        // Implémentez ici la logique de filtrage (par titre, date, etc.)
+        // 🛠️ CORRECTION DE LA SYNTAXE ICI
         if ($search = $request->get('search')) {
-            $query->where('title', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+            $query->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('location', 'like', '%' . $search . '%');
         }
-        // ... (autres filtres)
 
         return $query->paginate(10); // Utilisation de la pagination
     }
@@ -129,9 +124,47 @@ class EventController extends Controller
         return response()->json($event);
     }
     
-    // Assurez-vous d'implémenter la méthode 'register' pour l'inscription si elle n'existe pas encore.
+    /**
+     * Gère l'inscription d'un utilisateur à un événement et envoie le billet.
+     */
     public function register(Request $request, Event $event)
     {
-        // Logique d'inscription de l'utilisateur à l'événement
+        // 1. Validation des données de l'utilisateur
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            // Note: Vous pouvez ajouter ici la logique pour vérifier si le participant
+            // est déjà inscrit ou si la capacité est atteinte.
+        ]);
+        
+        // 2. Enregistrement de l'inscription (Données simulées pour l'email)
+        // 💡 REMPLACEZ CECI par votre logique de sauvegarde réelle (ex: création d'une
+        // entrée dans une table 'participants' ou 'inscriptions' liée à l'événement).
+        $participant = (object)[
+            'id' => uniqid(), // Utilisation d'un ID temporaire/unique
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+        
+
+        // 3. Envoi de l'email (Le point CRUCIAL pour Mailpit)
+        try {
+            // Envoie l'email au participant avec les données de l'événement et du participant.
+            Mail::to($participant->email)->send(new EventTicketMail($event, $participant));
+            
+            \Log::info("Billet d'événement envoyé via Mailpit à: " . $participant->email);
+
+        } catch (\Exception $e) {
+            // Gérer les erreurs d'envoi d'email
+            \Log::error("Erreur lors de l'envoi du billet d'événement: " . $e->getMessage());
+        }
+
+
+        // 4. Réponse au Frontend
+        return response()->json([
+            'message' => 'Inscription réussie! Votre billet a été envoyé à votre email.',
+            'event_title' => $event->title,
+            'participant' => $participant,
+        ], 201);
     }
-}
+} // La classe EventController se termine correctement.

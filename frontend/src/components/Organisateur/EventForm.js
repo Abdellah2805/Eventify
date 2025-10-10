@@ -1,9 +1,10 @@
-// src/components/Organisateur/EventForm.js (MIS À JOUR)
+// src/components/Organisateur/EventForm.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createEvent, updateEvent, fetchEventDetails } from '../../services/API';
+// 🔑 updateEvent et createEvent incluent déjà la gestion du CSRF (voir API.js)
+import { createEvent, updateEvent, fetchEventDetails } from '../../services/API'; 
 
 const EventForm = ({ isEditMode = false }) => {
     const { id } = useParams();
@@ -14,7 +15,7 @@ const EventForm = ({ isEditMode = false }) => {
     const [isLoading, setIsLoading] = useState(isEditMode);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState(null);
-    const [submitMessage, setSubmitMessage] = useState(null); // Nouveau pour le message de succès
+    const [submitMessage, setSubmitMessage] = useState(null); 
     
     
     // Fonction de chargement pour le mode modification
@@ -34,7 +35,7 @@ const EventForm = ({ isEditMode = false }) => {
                 location: eventData.location,
                 date: formattedDate,
                 capacity: eventData.capacity,
-                // category_id: eventData.category_id, // Si vous utilisez cette colonne
+                // category_id: eventData.category_id,
             });
         } catch (error) {
             setSubmitError("Erreur lors du chargement des détails de l'événement.");
@@ -60,23 +61,34 @@ const EventForm = ({ isEditMode = false }) => {
 
         try {
             if (isEditMode) {
+                // L'appel utilise updateEvent qui gère le CSRF et la méthode PUT
                 await updateEvent(id, data);
                 setSubmitMessage({ type: 'success', text: 'Événement mis à jour avec succès ! Redirection...' });
             } else {
+                // L'appel utilise createEvent qui gère le CSRF et la méthode POST
                 await createEvent(data);
-                // 🔑 Confirmation pour l'utilisateur
                 setSubmitMessage({ type: 'success', text: 'Événement créé avec succès ! Redirection vers la liste...' });
             }
 
-            // 🔑 Délai de 1.5s avant la navigation pour garantir l'affichage du message de succès
+            // Délai de 1.5s avant la navigation pour garantir l'affichage du message de succès
             setTimeout(() => {
                 navigate('/organisateur/evenements', { replace: true });
             }, 1500); 
 
         } catch (error) {
             console.error("Erreur de soumission:", error);
-            const errorMessage = error.response?.data?.message || "Erreur de serveur. Veuillez vérifier les données.";
+            
+            // 🔑 CORRECTION CLÉ : Gestion spécifique du 419 (CSRF Mismatch)
+            let errorMessage = "Erreur de serveur. Veuillez vérifier les données.";
+            
+            if (error.response?.status === 419) {
+                errorMessage = "Échec de sécurité (419) : La session a expiré. Veuillez vous déconnecter et vous reconnecter.";
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            
             setSubmitError(errorMessage);
+            
         } finally {
             setIsSubmitting(false);
         }
@@ -91,7 +103,7 @@ const EventForm = ({ isEditMode = false }) => {
         <div className="form-container">
             <h2>{isEditMode ? 'Modifier l\'événement' : 'Créer un nouvel événement'}</h2>
             
-            {/* 🔑 Affichage du message de succès ou d'erreur */}
+            {/* Affichage du message de succès ou d'erreur */}
             {submitMessage && (
                 <div className={`alert alert-${submitMessage.type}`}>{submitMessage.text}</div>
             )}
@@ -116,7 +128,6 @@ const EventForm = ({ isEditMode = false }) => {
                 {/* Champ Date et Heure */}
                 <div className="form-group">
                     <label htmlFor="date">Date et Heure de l'événement</label>
-                    {/* Le type datetime-local est nécessaire pour le format YYYY-MM-DDTHH:mm */}
                     <input id="date" type="datetime-local" {...register('date', { required: "La date et l'heure sont requises" })} />
                     {errors.date && <p className="error-message">{errors.date.message}</p>}
                 </div>

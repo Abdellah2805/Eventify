@@ -1,4 +1,4 @@
-// src/components/Organisateur/EventList.js (FINAL CSS-FRIENDLY)
+// src/components/Organisateur/EventList.js (Aucune modification nécessaire)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchMyEvents, deleteEvent } from '../../services/API';
@@ -16,13 +16,17 @@ const EventList = () => {
         setNotification(null); 
 
         try {
-            const response = await fetchMyEvents();
+            // Cette requête devrait maintenant fonctionner grâce à la correction dans AuthContext.js
+            const response = await fetchMyEvents(); 
             setEvents(response.data); 
         } catch (err) {
             console.error("Erreur lors du chargement des événements:", err);
-            // L'erreur affichée sur la capture d'écran se produit ici.
-            // C'est souvent dû au token ou à l'API.
-            setError("Impossible de charger les événements. Vérifiez votre connexion.");
+            // 🔑 Amélioration de la gestion d'erreur 401/403:
+            let errorMessage = "Impossible de charger les événements. Vérifiez votre connexion.";
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                 errorMessage = "Accès refusé. Veuillez vous déconnecter et vous reconnecter pour rafraîchir la session.";
+            }
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -49,7 +53,15 @@ const EventList = () => {
 
         } catch (err) {
             console.error("Erreur lors de la suppression:", err);
-            setNotification({ type: 'error', message: `Erreur: Impossible de supprimer l'événement. Le serveur a renvoyé une erreur.` });
+            
+            let errorMessage = `Erreur: Impossible de supprimer l'événement. Le serveur a renvoyé une erreur.`;
+            if (err.response?.status === 419) {
+                 errorMessage = "Erreur de sécurité (419) : Le jeton CSRF a expiré. Veuillez vous reconnecter et réessayer l'action.";
+            } else if (err.response?.status === 403) {
+                 errorMessage = "Accès refusé. Vérifiez que vous avez la permission de supprimer cet événement.";
+            }
+            
+            setNotification({ type: 'error', message: errorMessage });
         }
     };
 
@@ -73,8 +85,7 @@ const EventList = () => {
     return (
         <div className="event-list-container">
             <header className="list-header">
-                <h2>Mes Événements Publiés ({events.length})</h2>
-                {/* Utilisation de la classe btn-primary pour le bouton d'ajout */}
+                <h2>Mes Événements Publiés ({events.length})</h2> 
                 <Link to="/organisateur/nouveau" className="btn-primary">
                     + Ajouter un nouvel événement
                 </Link>
@@ -82,7 +93,6 @@ const EventList = () => {
 
             <NotificationDisplay /> 
 
-            {/* Utilisation de la classe alert-danger pour les erreurs de chargement */}
             {error && <div className="alert alert-danger">{error}</div>}
 
             {events.length === 0 ? (
@@ -95,7 +105,7 @@ const EventList = () => {
                     {events.map((event) => (
                         <div key={event.id} className="event-card">
                             <h3>{event.title}</h3>
-                            <p>Lieu : {event.location}</p>
+                            <p>Lieu : {event.location || event.lieu || 'Non spécifié'}</p>
                             <div className="card-actions">
                                 <Link 
                                     to={`/organisateur/modifier/${event.id}`} 

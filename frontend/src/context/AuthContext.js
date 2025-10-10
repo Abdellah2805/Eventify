@@ -21,7 +21,9 @@ export const AuthProvider = ({ children }) => {
         // Initialisation de l'API (à exécuter une seule fois au montage)
         const token = localStorage.getItem('auth_token');
         if (token) {
-            setAuthToken(token);
+            // 🔑 CORRECTION CRUCIALE : Applique le token à Axios au chargement initial
+            setAuthToken(token); 
+            setIsAuthenticated(true); // Assure que l'état est synchro
         }
         setLoading(false);
     }, []);
