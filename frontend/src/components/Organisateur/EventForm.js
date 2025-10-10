@@ -35,7 +35,7 @@ const EventForm = ({ isEditMode = false }) => {
                 location: eventData.location,
                 date: formattedDate,
                 capacity: eventData.capacity,
-                // category_id: eventData.category_id,
+                category_id: eventData.category_id,
             });
         } catch (error) {
             setSubmitError("Erreur lors du chargement des détails de l'événement.");
@@ -142,11 +142,25 @@ const EventForm = ({ isEditMode = false }) => {
                 {/* Champ Capacité */}
                 <div className="form-group">
                     <label htmlFor="capacity">Nombre de places disponibles</label>
-                    <input id="capacity" type="number" {...register('capacity', { 
+                    <input id="capacity" type="number" {...register('capacity', {
                         required: "La capacité est requise",
                         min: { value: 1, message: "Doit être au moins 1" }
                     })} />
                     {errors.capacity && <p className="error-message">{errors.capacity.message}</p>}
+                </div>
+
+                {/* Champ Catégorie */}
+                <div className="form-group">
+                    <label htmlFor="category_id">Catégorie</label>
+                    <select id="category_id" {...register('category_id')}>
+                        <option value="">Sélectionner une catégorie</option>
+                        <option value="1">Musique</option>
+                        <option value="2">Conférence</option>
+                        <option value="3">Sport</option>
+                        <option value="4">Art & Culture</option>
+                        <option value="5">Technologie</option>
+                        <option value="6">Éducation</option>
+                    </select>
                 </div>
 
                 <button type="submit" disabled={isSubmitting} className="btn-primary">

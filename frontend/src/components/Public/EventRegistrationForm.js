@@ -42,40 +42,34 @@ const EventRegistrationForm = ({ eventId }) => {
         }
     };
     
-    // Style de base pour les notifications
-    const feedbackStyle = {
-        padding: '10px',
-        borderRadius: '4px',
-        fontWeight: 'bold',
-        marginTop: '15px',
-        color: 'white',
-        backgroundColor: feedback?.type === 'success' ? '#28a745' : '#dc3545'
-    };
-
-
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="registration-form">
-            
-            <p>Veuillez remplir le formulaire ci-dessous pour réserver votre place.</p>
-            
+
+            <div className="form-intro">
+                <span className="icon">📝</span>
+                <p>Veuillez remplir le formulaire ci-dessous pour réserver votre place.</p>
+            </div>
+
             {/* Champ Nom */}
-            <div className="form-group" style={{ marginBottom: '15px' }}>
+            <div className="form-group">
                 <label htmlFor="name">Votre Nom et Prénom</label>
                 <input
                     id="name"
                     type="text"
+                    placeholder="Ex: Jean Dupont"
                     {...register('name', { required: 'Votre nom est requis' })}
                 />
-                {errors.name && <p className="error-message" style={{ color: 'red' }}>{errors.name.message}</p>}
+                {errors.name && <p className="error-message">{errors.name.message}</p>}
             </div>
 
             {/* Champ Email */}
-            <div className="form-group" style={{ marginBottom: '15px' }}>
+            <div className="form-group">
                 <label htmlFor="email">Votre Email (pour la confirmation)</label>
                 <input
                     id="email"
                     type="email"
-                    {...register('email', { 
+                    placeholder="votre.email@exemple.com"
+                    {...register('email', {
                         required: 'Votre email est requis',
                         pattern: {
                             value: /^\S+@\S+$/i,
@@ -83,23 +77,29 @@ const EventRegistrationForm = ({ eventId }) => {
                         }
                     })}
                 />
-                {errors.email && <p className="error-message" style={{ color: 'red' }}>{errors.email.message}</p>}
+                {errors.email && <p className="error-message">{errors.email.message}</p>}
             </div>
 
-            <button type="submit" disabled={isSubmitting} style={{ 
-                width: '100%', 
-                padding: '12px', 
-                backgroundColor: isSubmitting ? '#ccc' : '#ff6700', // Orange Eventify
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '4px',
-                cursor: 'pointer'
-            }}>
-                {isSubmitting ? 'Enregistrement...' : 'Confirmer mon inscription'}
+            <button type="submit" disabled={isSubmitting} className="btn-primary registration-submit">
+                {isSubmitting ? (
+                    <>
+                        <span className="icon">⏳</span>
+                        Enregistrement...
+                    </>
+                ) : (
+                    <>
+                        <span className="icon">✅</span>
+                        Confirmer mon inscription
+                    </>
+                )}
             </button>
-            
+
             {/* Affichage du Feedback */}
-            {feedback && <div style={feedbackStyle}>{feedback.message}</div>}
+            {feedback && (
+                <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-danger'} registration-feedback`}>
+                    {feedback.message}
+                </div>
+            )}
 
         </form>
     );

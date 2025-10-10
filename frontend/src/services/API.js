@@ -3,16 +3,37 @@
 import axios from 'axios';
 
 // 💡 ATTENTION : Configure l'URL de base de ton backend Laravel
-const API_BASE_URL = 'http://localhost:8000/api'; 
+const API_BASE_URL = 'http://localhost:8000/api';
+
+/**
+ * Fonction pour obtenir la valeur d'un cookie par son nom.
+ */
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
 
 const api = axios.create({
     baseURL: API_BASE_URL,
     // 🔑 CONSERVATION CRUCIALE : Permet l'envoi et la réception des cookies (session, CSRF)
-    withCredentials: true, 
+    withCredentials: true,
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
+});
+
+// 🔑 Intercepteur pour ajouter automatiquement le token CSRF aux requêtes
+api.interceptors.request.use(config => {
+    const token = getCookie('XSRF-TOKEN');
+    if (token) {
+        config.headers['X-XSRF-TOKEN'] = decodeURIComponent(token);
+    }
+    return config;
+}, error => {
+    return Promise.reject(error);
 });
 
 /**

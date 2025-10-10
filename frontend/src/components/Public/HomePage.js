@@ -69,6 +69,9 @@ const HomePage = () => {
         { id: '1', name: 'Musique' },
         { id: '2', name: 'Conférence' },
         { id: '3', name: 'Sport' },
+        { id: '4', name: 'Art & Culture' },
+        { id: '5', name: 'Technologie' },
+        { id: '6', name: 'Éducation' },
     ];
     
     
@@ -116,8 +119,8 @@ const HomePage = () => {
                     </div>
 
                     <div className="form-group filter-input">
-                        <label htmlFor="category">Catégorie</label>
-                        <select id="category" {...register('category')}>
+                        <label htmlFor="category_id">Catégorie</label>
+                        <select id="category_id" {...register('category_id')}>
                             {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                         </select>
                     </div>
@@ -144,33 +147,40 @@ const HomePage = () => {
                     <PaginationControls />
                     
                     <div className="event-public-list">
-                        {events.map((event) => (
-                            <div key={event.id} className="event-card-public">
-                                <h3 className="event-title">{event.title}</h3>
-                                
-                                {/* 💡 AMÉLIORATION DU DESIGN : Utilisation des span et des classes */}
-                                
-                                {/* Lieu */}
-                                <p>
-                                    <span className="icon">📍</span> 
-                                    {event.location}
-                                </p>
-                                
-                                {/* Date */}
-                                <p>
-                                    <span className="icon">📅</span> 
-                                    {new Date(event.date).toLocaleString('fr-FR', { 
-                                        day: '2-digit', month: '2-digit', year: 'numeric', 
-                                        hour: '2-digit', minute: '2-digit' 
-                                    })}
-                                </p>
-                                
-                                {/* Lien de Détail */}
-                                <Link to={`/evenement/${event.id}`} className="details-link">
-                                    Voir les détails →
-                                </Link>
-                            </div>
-                        ))}
+                        {events.map((event) => {
+                            const categoryName = categories.find(cat => cat.id === event.category_id?.toString())?.name || 'Non catégorisé';
+                            return (
+                                <div key={event.id} className="event-card-public">
+                                    <h3 className="event-title">{event.title}</h3>
+
+                                    {/* Catégorie */}
+                                    <p>
+                                        <span className="icon">🏷️</span>
+                                        {categoryName}
+                                    </p>
+
+                                    {/* Lieu */}
+                                    <p>
+                                        <span className="icon">📍</span>
+                                        {event.location}
+                                    </p>
+
+                                    {/* Date */}
+                                    <p>
+                                        <span className="icon">📅</span>
+                                        {new Date(event.date).toLocaleString('fr-FR', {
+                                            day: '2-digit', month: '2-digit', year: 'numeric',
+                                            hour: '2-digit', minute: '2-digit'
+                                        })}
+                                    </p>
+
+                                    {/* Lien de Détail */}
+                                    <Link to={`/evenement/${event.id}`} className="details-link">
+                                        Voir les détails →
+                                    </Link>
+                                </div>
+                            );
+                        })}
                     </div>
                     
                     <PaginationControls />

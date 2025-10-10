@@ -110,10 +110,22 @@ class EventController extends Controller
         // Logique de recherche/filtrage pour la page d'accueil
         $query = Event::query();
 
-        // 🛠️ CORRECTION DE LA SYNTAXE ICI
+        // Recherche par titre ou lieu
         if ($search = $request->get('search')) {
-            $query->where('title', 'like', '%' . $search . '%')
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
                   ->orWhere('location', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filtrage par catégorie
+        if ($categoryId = $request->get('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        // Filtrage par date (événements à partir de cette date)
+        if ($date = $request->get('date')) {
+            $query->whereDate('date', '>=', $date);
         }
 
         return $query->paginate(10); // Utilisation de la pagination
