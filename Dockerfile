@@ -1,31 +1,23 @@
 FROM dunglas/frankenphp:php8.2
 
-# Install system packages (THIS is what you're missing)
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    zip \
-    && rm -rf /var/lib/apt/lists/*
+# System deps
+RUN apt-get update && apt-get install -y git unzip zip && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN install-php-extensions \
-    pdo_mysql \
-    mbstring \
-    bcmath \
-    gd \
-    exif \
-    zip
+# PHP extensions (include zip!)
+RUN install-php-extensions pdo_mysql mbstring bcmath gd exif zip
 
-# Add composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 COPY . .
 
-RUN cp .env.example .env || true
-RUN chmod -R 775 storage bootstrap/cache || true
-
-# Now this will work
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-CMD sh -c "echo 'STARTING' && php -v && php artisan --version && php -S 0.0.0.0:$PORT -t public"
+# Permissions (VERY important)
+RUN chmod -R 775 storage bootstrap/cache || true
+
+# Railway uses PORT env var
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
+
+EXPOSE $PORT
