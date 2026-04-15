@@ -56,6 +56,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'port' => env('PORT', 8000),
+
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 
     'asset_url' => env('ASSET_URL', '/'),
@@ -212,10 +214,10 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // ... autres alias existants
-        
+
         // 🔑 AJOUTEZ CETTE LIGNE
         'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
-        
+
     ])->toArray(),
 
 ];

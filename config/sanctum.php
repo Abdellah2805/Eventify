@@ -14,8 +14,8 @@ return [
     */
     // 🔑 CORRECTION CLÉ : Simplifie l'assignation de la variable d'environnement pour éviter les erreurs de parsing.
     // Assure que localhost:3000 (votre frontend) est toujours considéré comme un domaine de confiance.
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1'
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS',
+        'localhost,localhost:3000,127.0.0.1,127.0.0.1:'.env('PORT', 8000).',::1'
     )),
 
     /*
