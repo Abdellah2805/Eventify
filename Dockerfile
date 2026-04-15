@@ -28,4 +28,4 @@ RUN chmod -R 775 storage bootstrap/cache || true
 # Now this will work
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-CMD php -S 0.0.0.0:$PORT -t public
+CMD sh -c "echo 'STARTING' && php -v && php artisan --version && php -S 0.0.0.0:$PORT -t public"
