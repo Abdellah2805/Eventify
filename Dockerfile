@@ -28,4 +28,4 @@ RUN chmod -R 775 storage bootstrap/cache || true
 # Now this will work
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
