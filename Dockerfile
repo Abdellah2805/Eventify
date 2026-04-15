@@ -1,24 +1,31 @@
 FROM dunglas/frankenphp:php8.2
 
+# Install system packages (THIS is what you're missing)
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
 RUN install-php-extensions \
     pdo_mysql \
     mbstring \
     bcmath \
     gd \
-    exif
+    exif \
+    zip
 
+# Add composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 COPY . .
 
-# Ensure env exists
 RUN cp .env.example .env || true
-
-# Fix permissions
 RUN chmod -R 775 storage bootstrap/cache || true
 
-# Install dependencies
+# Now this will work
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
